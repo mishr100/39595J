@@ -29,7 +29,7 @@ public class Test implements Runnable {
   
     }
 
-    public void roomPassageDriver(double xCord, double yCord, double width, double height){
+    public void roomPassageDriver(double xCord, double yCord, double width, double height, Dungeon playingSpace){
         // necessary declarations 
         int playerxCord = 0;
         int playeryCord = 0;
@@ -198,6 +198,8 @@ public class Test implements Runnable {
     }
         // create dungeon and start multithreading to view it 
         Dungeon playingSpace = Dungeon.buildDungeon(null, 0, 0, 0, 0);
+        // extracting room information for the display
+
         Test test = new Test(playingSpace.getWidth(), playingSpace.getHeight());
         Thread testThread = new Thread(test);
         testThread.start();
@@ -206,7 +208,7 @@ public class Test implements Runnable {
         double yCord = 0;
         double width = 0;
         double height = 0;
-        test.roomPassageDriver(xCord, yCord, width, height);
+        test.roomPassageDriver(xCord, yCord, width, height, playingSpace);
 
         // additional necessary multithreading for display
         test.keyStrokePrinter = new Thread(new KeyStrokePrinter(displayGrid));
