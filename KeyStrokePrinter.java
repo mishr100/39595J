@@ -1,6 +1,7 @@
 // defining changes to be made to display when a keyboard input is pressed 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import Step1Files.*;
 
 public class KeyStrokePrinter implements InputObserver, Runnable {
 
@@ -66,6 +67,7 @@ public class KeyStrokePrinter implements InputObserver, Runnable {
         char holder = displayGrid.getObjectOnDisplay(displayGrid.playerxCord + 1, displayGrid.playeryCord + 1);
         displayGrid.objectGrid[displayGrid.playerxCord][displayGrid.playeryCord] = holder;
         displayGrid.objectGrid[displayGrid.playerxCord + 1][displayGrid.playeryCord + 1] = '@';
+        
         //displayGrid.addObjectToDisplay('@', displayGrid.playerxCord + 1 , displayGrid.playeryCord + 1);
         //displayGrid.addObjectToDisplay(holder, displayGrid.playerxCord - 1, displayGrid.playeryCord - 1);
         displayGrid.playerxCord += 1;
