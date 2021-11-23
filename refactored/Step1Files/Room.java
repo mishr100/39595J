@@ -16,4 +16,12 @@ public class Room extends Structure {
     public ArrayList<Creature> getCreatures(){
         return things;
     }
+
+    public void setPassage(Passage passage){
+        passages.add(passage);
+    }
+
+    public ArrayList<Passage> getPassages(){
+        return passages;
+    }
 }

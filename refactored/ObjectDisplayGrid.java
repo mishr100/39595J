@@ -20,8 +20,8 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
 
     private static int height;
     private static int width;
-     public int playerxCord;
-     public int playeryCord;
+    public int playerxCord;
+    public int playeryCord;
 
     public ObjectDisplayGrid(int _width, int _height) {
         width = _width;
@@ -29,6 +29,12 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
 
         terminal = new AsciiPanel(width, height);
         objectGrid = (Stack<Char>[][]) new Stack[width][height];
+        for(int i = 0; i < width; i++){
+            for(int j = 0; j < height; j++){
+                objectGrid[i][j] = new Stack<Char>();
+            }
+        }
+        System.out.println(objectGrid[0][0]);
         // objectGrid = (Stack<Displayable>[][])new Stack[width][height];
         // 2D for loop calling stack constructor
 
@@ -67,6 +73,13 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         }
         KeyEvent keypress = (KeyEvent) e;
         notifyInputObservers(keypress.getKeyChar());
+        Player track = Player.buildPlayer("", 0, 0);
+        addObjectToDisplay(track.getType(), track.getX() - 1, track.getY());
+        objectGrid[track.getX()][track.getY()].pop();
+        System.out.println(objectGrid[track.getX()][track.getY()].peek().getChar());
+        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek().getChar(), track.getX(), track.getY());
+        track.setX(track.getX() - 1);
+        
     }
 
     private void notifyInputObservers(char ch) {

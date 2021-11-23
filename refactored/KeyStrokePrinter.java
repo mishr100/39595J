@@ -23,7 +23,7 @@ public class KeyStrokePrinter implements InputObserver, Runnable {
             System.out.println(CLASSID + ".observerUpdate receiving character " + ch);
         }
         inputQueue.add(ch);
-        //processInput();
+        processInput();
         
     }
 
@@ -64,14 +64,8 @@ public class KeyStrokePrinter implements InputObserver, Runnable {
 
     private void movement(char pressed){
         System.out.println("character " + pressed + " entered on the keyboard");
-        char holder = displayGrid.getObjectOnDisplay(displayGrid.playerxCord + 1, displayGrid.playeryCord + 1);
-        //displayGrid.objectGrid[displayGrid.playerxCord][displayGrid.playeryCord] = holder;
-        //displayGrid.objectGrid[displayGrid.playerxCord + 1][displayGrid.playeryCord + 1] = '@';
         
-        //displayGrid.addObjectToDisplay('@', displayGrid.playerxCord + 1 , displayGrid.playeryCord + 1);
-        //displayGrid.addObjectToDisplay(holder, displayGrid.playerxCord - 1, displayGrid.playeryCord - 1);
-        displayGrid.playerxCord += 1;
-        displayGrid.playeryCord += 1;
+        
     }
 
     @Override

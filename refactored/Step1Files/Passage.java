@@ -19,4 +19,12 @@ public class Passage extends Structure {
         System.out.println("Y added " + y.get(y.size() - 1));
         
     }
+
+    public ArrayList<Integer> getXCord (){
+        return x;
+    }
+
+    public ArrayList<Integer> getYCord(){
+        return y;
+    }
 }
