@@ -56,7 +56,7 @@ public class Test implements Runnable {
 
     public void displayCreatures(ArrayList<Creature> allCreat, int xCord, int yCord){
         for(int i = 0; i < allCreat.size(); i++){
-            displayGrid.addObjectToDisplay((char) allCreat.get(i).getType(), (int) (allCreat.get(i).getX() + xCord), (int) (allCreat.get(i).getY() + yCord));
+            displayGrid.addObjectToDisplay(allCreat.get(i), (int) (allCreat.get(i).getX() + xCord), (int) (allCreat.get(i).getY() + yCord));
             allCreat.get(i).setX(allCreat.get(i).getX() + xCord);
             allCreat.get(i).setY(allCreat.get(i).getY() + yCord);
         }
@@ -66,33 +66,33 @@ public class Test implements Runnable {
             //displayGrid.fireUp();
             int endingy = 0;
             int endingx = 0;
-            displayGrid.addObjectToDisplay('X', (int) xCord, (int) yCord);
+            displayGrid.addObjectToDisplay(new RoomWall('X'), (int) xCord, (int) yCord);
     
             
             for(int i = 0; i < height; i++){
-                displayGrid.addObjectToDisplay('X', (int) xCord, (int) (yCord + i));
+                displayGrid.addObjectToDisplay(new RoomWall('X'), (int) xCord, (int) (yCord + i));
                 endingy = (int) yCord + i;
                 
             }
             
             for(int k = 1; k < width; k++){
-                displayGrid.addObjectToDisplay('X', (int) (xCord + k),  endingy);
+                displayGrid.addObjectToDisplay(new RoomWall('X'), (int) (xCord + k),  endingy);
             }
             
             for(int j = 0; j < width; j++){
-                displayGrid.addObjectToDisplay('X', (int) (xCord + j), (int) (yCord));
+                displayGrid.addObjectToDisplay(new RoomWall('X'), (int) (xCord + j), (int) (yCord));
                 endingx = (int) xCord + j;
             }
             
             for(int l = 1; l < height; l++){
-                displayGrid.addObjectToDisplay('X', endingx, (int) yCord + l);
+                displayGrid.addObjectToDisplay(new RoomWall('X'), endingx, (int) yCord + l);
             }
     
             System.out.println("LOOK HERE" + xCord);
             System.out.println("LOOK HERE" + yCord);
             for(int x = 1; x < width - 1;  x++){
                 for(int y = 1; y < height - 1; y++ ){
-                    displayGrid.addObjectToDisplay('.', x + (int) xCord,  y + (int) yCord);
+                    displayGrid.addObjectToDisplay(new RoomFloor('.'), x + (int) xCord,  y + (int) yCord);
                 }
             }    
         }
@@ -115,23 +115,23 @@ public class Test implements Runnable {
                 System.out.println("(" + nextx + " ," + nexty + ")");
                 System.out.println("---------------------------------------");
                 if(i == 0){
-                    displayGrid.addObjectToDisplay('+', initialx, initialy);
+                    displayGrid.addObjectToDisplay(new PassageJunction('+'), initialx, initialy);
                 }
                 else if(i == horizontal.size() - 2){
-                    displayGrid.addObjectToDisplay('+', nextx, nexty);
+                    displayGrid.addObjectToDisplay(new PassageJunction('+'), nextx, nexty);
                 }
                 else{
-                    displayGrid.addObjectToDisplay('#', initialx, initialy);
-                    displayGrid.addObjectToDisplay('#', nextx, nexty);
+                    displayGrid.addObjectToDisplay(new PassageFloor('#'), initialx, initialy);
+                    displayGrid.addObjectToDisplay(new PassageFloor('#'), nextx, nexty);
                 }
                 int initialxCopy = initialx;
                 while(initialx != nextx){
                     if (nextx > initialx){
-                        displayGrid.addObjectToDisplay('#', initialx + 1, initialy);
+                        displayGrid.addObjectToDisplay(new PassageFloor('#'), initialx + 1, initialy);
                         initialx += 1;
                     }
                     else {
-                        displayGrid.addObjectToDisplay('#', initialx - 1, initialy);
+                        displayGrid.addObjectToDisplay(new PassageFloor('#'), initialx - 1, initialy);
                         initialx -= 1;
                     }
                     
@@ -141,15 +141,15 @@ public class Test implements Runnable {
                 left = displayGrid.getObjectOnDisplay(initialx - 1, initialy);
                 right = displayGrid.getObjectOnDisplay(initialx + 1, initialy);
                 if(up == 'X' || down == 'X' || left == 'X' || right == 'X'){
-                    displayGrid.addObjectToDisplay('+', initialx, initialy);
+                    displayGrid.addObjectToDisplay(new PassageJunction('+'), initialx, initialy);
                 }
                 while(initialy != nexty){
                     if(nexty > initialy){
-                        displayGrid.addObjectToDisplay('#', initialxCopy, initialy + 1);
+                        displayGrid.addObjectToDisplay(new PassageFloor('#'), initialxCopy, initialy + 1);
                         initialy += 1;
                     }
                     else {
-                        displayGrid.addObjectToDisplay('#', initialxCopy, initialy - 1);
+                        displayGrid.addObjectToDisplay(new PassageFloor('#'), initialxCopy, initialy - 1);
                         initialy -= 1;
                     }
                 }
@@ -158,7 +158,7 @@ public class Test implements Runnable {
                 left = displayGrid.getObjectOnDisplay(initialxCopy - 1, initialy);
                 right = displayGrid.getObjectOnDisplay(initialxCopy + 1, initialy);
                 if(up == 'X' || down == 'X' || left == 'X' || right == 'X'){
-                    displayGrid.addObjectToDisplay('+', initialxCopy, initialy);
+                    displayGrid.addObjectToDisplay(new PassageJunction('+'), initialxCopy, initialy);
                 }
             }
         }

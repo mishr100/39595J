@@ -14,7 +14,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     private static final String CLASSID = ".ObjectDisplayGrid";
 
     private static AsciiPanel terminal;
-    private Stack<Char> [][] objectGrid = null;
+    private Stack<Displayable> [][] objectGrid = null;
 
     private List<InputObserver> inputObservers = null;
 
@@ -28,10 +28,10 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         height = _height;
 
         terminal = new AsciiPanel(width, height);
-        objectGrid = (Stack<Char>[][]) new Stack[width][height];
+        objectGrid = (Stack<Displayable>[][]) new Stack[width][height];
         for(int i = 0; i < width; i++){
             for(int j = 0; j < height; j++){
-                objectGrid[i][j] = new Stack<Char>();
+                objectGrid[i][j] = new Stack<Displayable>();
             }
         }
         System.out.println(objectGrid[0][0]);
@@ -74,12 +74,52 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         KeyEvent keypress = (KeyEvent) e;
         notifyInputObservers(keypress.getKeyChar());
         Player track = Player.buildPlayer("", 0, 0);
-        addObjectToDisplay(track.getType(), track.getX() - 1, track.getY());
-        objectGrid[track.getX()][track.getY()].pop();
-        System.out.println(objectGrid[track.getX()][track.getY()].peek().getChar());
-        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek().getChar(), track.getX(), track.getY());
-        track.setX(track.getX() - 1);
+        if (keypress.getKeyChar() == 'h'){
+            moveLeft(track);
+        }
+        else if(keypress.getKeyChar() == 'l'){
+            moveRight(track);
+        }
+        else if(keypress.getKeyChar() == 'j'){
+            moveDown(track);
+        }
+        else if(keypress.getKeyChar() == 'k'){
+            moveUp(track);
+        }
         
+        
+    }
+
+    private void moveLeft(Player track){
+        addObjectToDisplay(track, track.getX() - 1, track.getY());
+        objectGrid[track.getX()][track.getY()].pop();
+        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType());
+        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY());
+        track.setX(track.getX() - 1);
+    }
+
+    private void moveRight(Player track){
+        addObjectToDisplay(track, track.getX() + 1, track.getY()); // add player to new location
+        objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
+        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
+        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+        track.setX(track.getX() + 1);
+    }
+
+    private void moveDown(Player track){
+        addObjectToDisplay(track, track.getX(), track.getY() + 1); // add player to new location
+        objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
+        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
+        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+        track.setY(track.getY() + 1);
+    }
+
+    private void moveUp(Player track){
+        addObjectToDisplay(track, track.getX(), track.getY() - 1); // add player to new location
+        objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
+        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
+        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+        track.setY(track.getY() - 1);
     }
 
     private void notifyInputObservers(char ch) {
@@ -105,7 +145,9 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         char ch = ' ';
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                addObjectToDisplay(ch, i, j);
+                Displayable initial = new Displayable();
+                initial.setType(' ');
+                addObjectToDisplay(initial, i, j);
             }
         }
         terminal.repaint();
@@ -119,23 +161,23 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         }
     }
 
-    public void addObjectToDisplay(char ch, int x, int y) {
+    public void addObjectToDisplay(Displayable ch, int x, int y) {
         if ((0 <= x) && (x < objectGrid.length)) {
             if ((0 <= y) && (y < objectGrid[0].length)) {
-                objectGrid[x][y].push(new Char(ch));
+                objectGrid[x][y].push(ch);
                 writeToTerminal(x, y);
             }
         }
     }
 
     public char getObjectOnDisplay(int x, int y){
-        return objectGrid[x][y].peek().getChar();//peek
+        return objectGrid[x][y].peek().getType();//peek
     }
 
     // add pop(x, y)
 
     private void writeToTerminal(int x, int y) {
-        char ch = objectGrid[x][y].peek().getChar();//.getChar(); //peek
+        char ch = objectGrid[x][y].peek().getType();//.getChar(); //peek
         terminal.write(ch, x, y); // staging a change for 
         terminal.repaint(); // executing the change 
     }

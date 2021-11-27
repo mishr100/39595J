@@ -1,9 +1,10 @@
 package Step1Files;
-public class PassageFloor {
+public class PassageFloor extends TraversableStructure {
     private int x;
     private int y;
-    public PassageFloor(){
+    public PassageFloor(char ch){
         System.out.println("New passage floor point being created");
+        this.setType(ch);
     }
 
     public void  setX(int _x){
