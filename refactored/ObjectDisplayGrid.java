@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import Step1Files.*;
-
+import java.lang.Math;
 
 public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubject{
 
@@ -14,7 +14,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     private static final String CLASSID = ".ObjectDisplayGrid";
 
     private static AsciiPanel terminal;
-    private Stack<Displayable> [][] objectGrid = null;
+     public Stack<Displayable> [][] objectGrid = null;
 
     private List<InputObserver> inputObservers = null;
 
@@ -74,6 +74,8 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         KeyEvent keypress = (KeyEvent) e;
         notifyInputObservers(keypress.getKeyChar());
         Player track = Player.buildPlayer("", 0, 0);
+        int origX = track.getX();
+        int origY = track.getY();
         if (keypress.getKeyChar() == 'h'){
             moveLeft(track);
         }
@@ -86,40 +88,127 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         else if(keypress.getKeyChar() == 'k'){
             moveUp(track);
         }
+        else if(keypress.getKeyChar() == 'd'){
+            dropItem(track);
+        }
         
         
     }
 
+
+    private void dropItem(Player track){
+        ArrayList<Item> playerItems = track.getPlayerItems();
+        objectGrid[track.getX()][track.getY()].add(objectGrid[track.getX()][track.getY()].size() - 1,playerItems.get(playerItems.size() - 1));
+        playerItems.remove(playerItems.size() - 1);
+        System.out.println(playerItems);
+    }
+
+    private boolean movementPossible(int x, int y){
+        Displayable atPoint = getObjectOnDisplay(x,y);
+        if (atPoint instanceof RoomFloor || atPoint instanceof PassageJunction || atPoint instanceof PassageFloor){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean pickUp(int x, int y){
+        Player player = Player.buildPlayer("", 0, 0);
+        Displayable atPoint = getObjectOnDisplay(x,y);
+        if(atPoint instanceof Item){
+            Item item = (Item) atPoint;
+            player.addPlayerItem(item);
+            System.out.println(getObjectOnDisplay(x,y).getType());
+            objectGrid[x][y].pop();
+            objectGrid[x][y].pop();
+            System.out.println(objectGrid[x][y]);
+            System.out.println(getObjectOnDisplay(x,y).getType());
+            if (objectGrid[x][y].peek().getType() == ' '){
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor, x, y);
+            }
+            else{
+                addObjectToDisplay(objectGrid[x][y].peek(), x, y);
+            }
+            ArrayList<Item> playerItem = player.getPlayerItems();
+            System.out.println(playerItem);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean combat(int x, int y){
+        Displayable atPoint = getObjectOnDisplay(x,y);
+        if (atPoint instanceof Monster){
+            // perform combat options
+            int monsterMax = atPoint.getMaxHit();
+            Player player = Player.buildPlayer("", 0, 0);
+            int playerMax = player.getMaxHit();
+            return true;
+            
+            
+        }
+        return false;
+    }
+
+    //private void updateInfoSection()
+
     private void moveLeft(Player track){
-        addObjectToDisplay(track, track.getX() - 1, track.getY());
-        objectGrid[track.getX()][track.getY()].pop();
-        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType());
-        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY());
-        track.setX(track.getX() - 1);
+        if(movementPossible(track.getX() - 1, track.getY())){
+            addObjectToDisplay(track, track.getX() - 1, track.getY());
+            objectGrid[track.getX()][track.getY()].pop();
+            System.out.println(objectGrid[track.getX()][track.getY()].peek().getType());
+            addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY());
+            track.setX(track.getX() - 1);
+        }
+        else{
+            combat(track.getX() - 1, track.getY());
+            pickUp(track.getX() - 1, track.getY());
+        }
     }
 
     private void moveRight(Player track){
-        addObjectToDisplay(track, track.getX() + 1, track.getY()); // add player to new location
-        objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
-        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
-        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
-        track.setX(track.getX() + 1);
+        if(movementPossible(track.getX() + 1, track.getY())){
+            addObjectToDisplay(track, track.getX() + 1, track.getY()); // add player to new location
+            objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
+            System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
+            addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+            track.setX(track.getX() + 1);
+        }
+        else{
+            combat(track.getX() + 1, track.getY());
+            pickUp(track.getX() + 1, track.getY());
+        }
     }
 
     private void moveDown(Player track){
-        addObjectToDisplay(track, track.getX(), track.getY() + 1); // add player to new location
-        objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
-        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
-        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
-        track.setY(track.getY() + 1);
+        if(movementPossible(track.getX(), track.getY() + 1)){
+            addObjectToDisplay(track, track.getX(), track.getY() + 1); // add player to new location
+            objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
+            System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
+            addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+            track.setY(track.getY() + 1);
+        }
+        else{
+            combat(track.getX(), track.getY() + 1);
+            pickUp(track.getX(), track.getY() + 1);
+
+        }
     }
 
     private void moveUp(Player track){
-        addObjectToDisplay(track, track.getX(), track.getY() - 1); // add player to new location
-        objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
-        System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
-        addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
-        track.setY(track.getY() - 1);
+        if(movementPossible(track.getX(), track.getY() - 1)){
+            addObjectToDisplay(track, track.getX(), track.getY() - 1); // add player to new location
+            objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
+            System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
+            addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+            track.setY(track.getY() - 1);
+            pickUp(track.getX(), track.getY() - 1);
+            
+        }
+        else{
+            combat(track.getX(), track.getY() - 1);
+            pickUp(track.getX(), track.getY() - 1);
+        }
     }
 
     private void notifyInputObservers(char ch) {
@@ -170,8 +259,12 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         }
     }
 
-    public char getObjectOnDisplay(int x, int y){
-        return objectGrid[x][y].peek().getType();//peek
+    public Displayable getObjectOnDisplay(int x, int y){
+        return objectGrid[x][y].peek();//peek
+    }
+
+    public void removeObjectFromDisplay(int x, int y){
+        objectGrid[x][y].pop();
     }
 
     // add pop(x, y)

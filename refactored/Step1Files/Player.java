@@ -28,5 +28,9 @@ public class Player extends Creature {
         playerItems.add(playerItem);
         System.out.println("Added item to player");
     }
+
+    public ArrayList<Item> getPlayerItems(){
+        return playerItems;
+    }
     
 }
