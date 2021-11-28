@@ -1,10 +1,11 @@
 package Step1Files;
+import java.util.ArrayList;
 public class Player extends Creature {
     private String name;
     private int room;
     private int serial;
     static Player player;
-
+    private ArrayList<Item> playerItems = new ArrayList<>();
     public static Player buildPlayer(String _name, int _room, int _serial){
         if(player ==  null){
            player = new Player(_name,  _room, _serial);
@@ -22,6 +23,10 @@ public class Player extends Creature {
         System.out.println("Player serial " + serial);
         this.setType('@');
 
+    }
+    public void addPlayerItem(Item playerItem){
+        playerItems.add(playerItem);
+        System.out.println("Added item to player");
     }
     
 }

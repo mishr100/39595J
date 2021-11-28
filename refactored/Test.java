@@ -39,6 +39,8 @@ public class Test implements Runnable {
             width = room.getWidth();
             height = room.getHeight(); 
             createInitial(xCord, yCord, width, height);
+            ArrayList<Item> available = room.getItems();
+            displayItems(available);
             ArrayList<Creature> allCreat = room.getCreatures();
             displayCreatures(allCreat, xCord, yCord);
             ArrayList<Passage> allPass = room.getPassages();
@@ -50,11 +52,69 @@ public class Test implements Runnable {
                 
             }
         }
+        roomForDisplay(displayGrid, playingSpace.getTopHeight());
+        writeInitialTop(displayGrid);
+        writeInitialBottom(displayGrid);
 
         
     }
 
-    public void displayCreatures(ArrayList<Creature> allCreat, int xCord, int yCord){
+    private void displayItems(ArrayList<Item> display){
+        for(int i = 0; i < display.size(); i++){
+            displayGrid.addObjectToDisplay(display.get(i), display.get(i).getX(), display.get(i).getY());
+        }
+    }
+
+    private void writeInitialTop(ObjectDisplayGrid displayGrid){
+        Player player = Player.buildPlayer("", 0, 0);
+        String hp = Integer.toString(player.getHp());
+        String top = "HP: " + hp + " Score:  0";
+        for(int i = 0; i < top.length(); i++){
+            char write = top.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            displayGrid.addObjectToDisplay(writing, i, 0);
+        }
+    }
+
+    private void writeInitialBottom(ObjectDisplayGrid displayGrid){
+        String firstBottom = "Pack: ";
+        String secBottom = "Info: ";
+        for(int i = 0; i < firstBottom.length(); i++){
+            char write = firstBottom.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 3);
+        }
+        for(int i = 0; i < firstBottom.length(); i++){
+            char write = secBottom.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 1);
+        }
+
+    }
+
+    
+    private void roomForDisplay(ObjectDisplayGrid displayGrid, int topHeight){
+        System.out.println(displayGrid.objectGrid[0].length);
+        for(int x = 0; x < displayGrid.objectGrid.length; x++){
+            for(int y = displayGrid.objectGrid[0].length - 8; y > -1; y--){
+                Displayable display = new Displayable();
+                display.setType(' ');
+                displayGrid.addObjectToDisplay(displayGrid.getObjectOnDisplay(x,y), x, y+topHeight);
+                displayGrid.addObjectToDisplay(display, x, y);
+            }
+        }
+        Player player = Player.buildPlayer("", 0, 0);
+        player.setY(player.getY() + topHeight);
+        displayGrid.removeObjectFromDisplay(player.getX(), player.getY());
+        displayGrid.addObjectToDisplay(new RoomFloor('.'), player.getX(), player.getY());
+        displayGrid.addObjectToDisplay(player, player.getX(), player.getY());
+    }
+    
+
+    private void displayCreatures(ArrayList<Creature> allCreat, int xCord, int yCord){
         for(int i = 0; i < allCreat.size(); i++){
             displayGrid.addObjectToDisplay(allCreat.get(i), (int) (allCreat.get(i).getX() + xCord), (int) (allCreat.get(i).getY() + yCord));
             allCreat.get(i).setX(allCreat.get(i).getX() + xCord);
@@ -62,7 +122,7 @@ public class Test implements Runnable {
         }
     }
 
-        public void createInitial(int xCord, int yCord, int width, int height){
+        private void createInitial(int xCord, int yCord, int width, int height){
             //displayGrid.fireUp();
             int endingy = 0;
             int endingx = 0;
@@ -87,9 +147,6 @@ public class Test implements Runnable {
             for(int l = 1; l < height; l++){
                 displayGrid.addObjectToDisplay(new RoomWall('X'), endingx, (int) yCord + l);
             }
-    
-            System.out.println("LOOK HERE" + xCord);
-            System.out.println("LOOK HERE" + yCord);
             for(int x = 1; x < width - 1;  x++){
                 for(int y = 1; y < height - 1; y++ ){
                     displayGrid.addObjectToDisplay(new RoomFloor('.'), x + (int) xCord,  y + (int) yCord);
@@ -97,7 +154,7 @@ public class Test implements Runnable {
             }    
         }
 
-        public void createPassage(ArrayList<Integer> horizontal, ArrayList<Integer> vertical){
+        private void createPassage(ArrayList<Integer> horizontal, ArrayList<Integer> vertical){
             int initialx;
             int initialy;
             int nextx;
@@ -136,10 +193,10 @@ public class Test implements Runnable {
                     }
                     
                 }
-                up = displayGrid.getObjectOnDisplay(initialx, initialy + 1);
-                down = displayGrid.getObjectOnDisplay(initialx, initialy - 1);
-                left = displayGrid.getObjectOnDisplay(initialx - 1, initialy);
-                right = displayGrid.getObjectOnDisplay(initialx + 1, initialy);
+                up = displayGrid.getObjectOnDisplay(initialx, initialy + 1).getType();
+                down = displayGrid.getObjectOnDisplay(initialx, initialy - 1).getType();
+                left = displayGrid.getObjectOnDisplay(initialx - 1, initialy).getType();
+                right = displayGrid.getObjectOnDisplay(initialx + 1, initialy).getType();
                 if(up == 'X' || down == 'X' || left == 'X' || right == 'X'){
                     displayGrid.addObjectToDisplay(new PassageJunction('+'), initialx, initialy);
                 }
@@ -153,10 +210,10 @@ public class Test implements Runnable {
                         initialy -= 1;
                     }
                 }
-                up = displayGrid.getObjectOnDisplay(initialxCopy, initialy + 1);
-                down = displayGrid.getObjectOnDisplay(initialxCopy, initialy - 1);
-                left = displayGrid.getObjectOnDisplay(initialxCopy - 1, initialy);
-                right = displayGrid.getObjectOnDisplay(initialxCopy + 1, initialy);
+                up = displayGrid.getObjectOnDisplay(initialxCopy, initialy + 1).getType();
+                down = displayGrid.getObjectOnDisplay(initialxCopy, initialy - 1).getType();
+                left = displayGrid.getObjectOnDisplay(initialxCopy - 1, initialy).getType();
+                right = displayGrid.getObjectOnDisplay(initialxCopy + 1, initialy).getType();
                 if(up == 'X' || down == 'X' || left == 'X' || right == 'X'){
                     displayGrid.addObjectToDisplay(new PassageJunction('+'), initialxCopy, initialy);
                 }
@@ -195,7 +252,7 @@ public class Test implements Runnable {
     Dungeon playingSpace = Dungeon.buildDungeon(null, 0, 0, 0, 0);
     // extracting room information for the display
 
-    Test test = new Test(playingSpace.getWidth(), playingSpace.getHeight());
+    Test test = new Test(playingSpace.getWidth(), playingSpace.getTopHeight() + playingSpace.getHeight() + playingSpace.getBottomHeight());
     Thread testThread = new Thread(test);
     testThread.start();
     // coordinate room and passage creation through variable initialization and roomPassageDriver function

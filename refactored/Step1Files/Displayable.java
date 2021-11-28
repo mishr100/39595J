@@ -13,7 +13,7 @@ public class Displayable{
     
     
     public Displayable(){
-        System.out.println("New displayable object created");
+        //System.out.println("New displayable object created");
     }
 
     public void setInvisible(){
@@ -46,7 +46,11 @@ public class Displayable{
 
     public void setType(char _type){
         type = _type;
-        System.out.println("Type is " + type);
+        //System.out.println("Type is " + type);
+    }
+
+    public int getMaxHit(){
+        return 0;
     }
 
     public char getType(){

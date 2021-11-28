@@ -4,6 +4,7 @@ public class Room extends Structure {
     private int roomNum;
     private ArrayList <Creature> things = new ArrayList<Creature> ();
     private ArrayList <Passage> passages = new ArrayList<Passage> ();
+    private ArrayList <Item> roomItems = new ArrayList<Item>();
     
     public Room (int number){
         roomNum = number;
@@ -21,7 +22,16 @@ public class Room extends Structure {
         passages.add(passage);
     }
 
+    public void setItem(Item item){
+        roomItems.add(item);
+        System.out.println("Added item to room");
+    }
+
     public ArrayList<Passage> getPassages(){
         return passages;
+    }
+
+    public ArrayList<Item> getItems(){
+        return roomItems;
     }
 }

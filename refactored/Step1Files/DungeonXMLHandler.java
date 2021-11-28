@@ -12,6 +12,8 @@ public class DungeonXMLHandler extends DefaultHandler {
     private Passage newPass = null;
     private Integer xHolder = 0;
     private PassageFloor point = null;
+    private Item anItem = null;
+    private Player player= null;
     //private ArrayList<Passages> allPass = new ArrayList<Passages>();
     //private ArrayList<Room> allRooms = new ArrayList<Room>();
     private Action action = null;
@@ -66,6 +68,7 @@ public class DungeonXMLHandler extends DefaultHandler {
             toAdd = Player.buildPlayer(name, room, serial);
             roomToParse.setCreature(toAdd);
             System.out.println("add creature");
+            player = Player.buildPlayer(name,room,serial);
         }
         else if(qName.equalsIgnoreCase("CreatureAction")){
             String name = attributes.getValue("name");
@@ -73,6 +76,57 @@ public class DungeonXMLHandler extends DefaultHandler {
             action = new CreatureAction(name, type);
             toAdd.addAction(action);
 
+        }
+        else if(qName.equalsIgnoreCase("Scroll")){
+            String name = attributes.getValue("name");
+            int room = Integer.parseInt(attributes.getValue("room"));
+            int serial = Integer.parseInt(attributes.getValue("serial"));
+            Scroll item = new Scroll(name, room, serial);
+            typeParsing = "Item";
+            anItem = item;
+            if(player == null){
+                roomToParse.setItem(item);
+            }
+            else{
+                player.addPlayerItem(item);
+            }
+
+        }
+        else if(qName.equalsIgnoreCase("Armor")){
+            String name = attributes.getValue("name");
+            int room = Integer.parseInt(attributes.getValue("room"));
+            int serial = Integer.parseInt(attributes.getValue("serial"));
+            Armor item = new Armor(name, room, serial);
+            typeParsing = "Item";
+            anItem = item;
+            if(player == null){
+                roomToParse.setItem(item);
+            }
+            else{
+                player.addPlayerItem(item);
+            }
+
+        }
+        else if(qName.equalsIgnoreCase("Sword")){
+            String name = attributes.getValue("name");
+            int room = Integer.parseInt(attributes.getValue("room"));
+            int serial = Integer.parseInt(attributes.getValue("serial"));
+            Sword item = new Sword(name, room, serial);
+            typeParsing = "Item";
+            anItem = item;
+            if(player == null){
+                roomToParse.setItem(item);
+            }
+            else{
+                player.addPlayerItem(item);
+            }
+
+        }
+        else if(qName.equalsIgnoreCase("ItemAction")){
+            String name = attributes.getValue("name");
+            String type = attributes.getValue("type");
+            action = new ItemActions(name, type);
+            anItem.addItem(action);
         }
         data = new StringBuilder();
     } 
@@ -85,6 +139,9 @@ public class DungeonXMLHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if(qName.equalsIgnoreCase("posX") && typeParsing.equals("Room")){
             roomToParse.setX(Integer.parseInt(data.toString()));
+        }
+        else if(qName.equalsIgnoreCase("Player")){
+            player = null;
         }
         else if(qName.equalsIgnoreCase("posY") && typeParsing.equals("Room")){
             roomToParse.setY(Integer.parseInt(data.toString()));
@@ -122,9 +179,6 @@ public class DungeonXMLHandler extends DefaultHandler {
         else if(qName.equalsIgnoreCase("actionIntValue")){
             action.setIntValue(Integer.parseInt(data.toString()));
         }
-        else if(qName.equalsIgnoreCase("actionIntValue")){
-            action.setIntValue(Integer.parseInt(data.toString()));
-        }
         else if(qName.equalsIgnoreCase("actionCharValue")){
             action.setCharValue(data.toString());
         }
@@ -133,6 +187,15 @@ public class DungeonXMLHandler extends DefaultHandler {
         }
         else if(qName.equalsIgnoreCase("posY") && typeParsing.equals("Passage")){
             newPass.addY(Integer.parseInt(data.toString()));
+        }
+        else if(qName.equalsIgnoreCase("posX") && typeParsing.equals("Item")){
+            anItem.setX(Integer.parseInt(data.toString()));
+        }
+        else if(qName.equalsIgnoreCase("posY") && typeParsing.equals("Item")){
+            anItem.setY(Integer.parseInt(data.toString()));
+        }
+        else if(qName.equalsIgnoreCase("ItemIntValue") && typeParsing.equals("Item")){
+            anItem.addItemValue(Integer.parseInt(data.toString()));
         }
         
     }
