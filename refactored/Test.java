@@ -86,13 +86,12 @@ public class Test implements Runnable {
             writing.setType(write);
             displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 3);
         }
-        for(int i = 0; i < firstBottom.length(); i++){
+        for(int i = 0; i < secBottom.length(); i++){
             char write = secBottom.charAt(i);
             Displayable writing = new Displayable();
             writing.setType(write);
             displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 1);
         }
-
     }
 
     

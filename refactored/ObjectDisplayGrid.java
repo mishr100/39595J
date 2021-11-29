@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Stack;
 import Step1Files.*;
 import java.lang.Math;
+import java.util.Random;
 
 public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubject{
 
@@ -74,27 +75,57 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         KeyEvent keypress = (KeyEvent) e;
         notifyInputObservers(keypress.getKeyChar());
         Player track = Player.buildPlayer("", 0, 0);
-        int origX = track.getX();
-        int origY = track.getY();
-        if (keypress.getKeyChar() == 'h'){
-            moveLeft(track);
-        }
-        else if(keypress.getKeyChar() == 'l'){
-            moveRight(track);
-        }
-        else if(keypress.getKeyChar() == 'j'){
-            moveDown(track);
-        }
-        else if(keypress.getKeyChar() == 'k'){
-            moveUp(track);
-        }
-        else if(keypress.getKeyChar() == 'd'){
-            dropItem(track);
-        }
+        if(track.getHp() > 0){
+            int origX = track.getX();
+            int origY = track.getY();
+            if (keypress.getKeyChar() == 'h'){
+                moveLeft(track);
+            }
+            else if(keypress.getKeyChar() == 'l'){
+                moveRight(track);
+            }
+            else if(keypress.getKeyChar() == 'j'){
+                moveDown(track);
+            }
+            else if(keypress.getKeyChar() == 'k'){
+                moveUp(track);
+            }
+            else if(keypress.getKeyChar() == 'd'){
+                dropItem(track);
+            }
+            else if(keypress.getKeyChar() == 'i'){
+                showPack(track);
+            }
+    }
         
         
     }
 
+    private void clearRow(int y){
+        for(int i = 0; i < this.objectGrid.length; i++){
+            Displayable clear = new Displayable();
+            clear.setType(' ');
+            addObjectToDisplay(clear, i, y);
+        }
+    }
+
+    private void showPack(Player track){
+        String firstBottom = "Pack: ";
+        clearRow(this.objectGrid[0].length - 3);
+        ArrayList<Item> pack = track.getPlayerItems();
+        for(int j = 0; j < pack.size(); j++){
+            firstBottom += Integer.toString(j) + ": " + pack.get(j).getType() + " ";
+        }
+        if(pack.size() == 0){
+            firstBottom = "Pack: ";
+        }
+        for(int i = 0; i < firstBottom.length(); i++){
+            char write = firstBottom.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 3);
+        }
+    }
 
     private void dropItem(Player track){
         ArrayList<Item> playerItems = track.getPlayerItems();
@@ -141,13 +172,41 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         if (atPoint instanceof Monster){
             // perform combat options
             int monsterMax = atPoint.getMaxHit();
+            int randomMon = (int) (Math.random() * monsterMax + 1);
+            //System.out.println(randomMon);
             Player player = Player.buildPlayer("", 0, 0);
             int playerMax = player.getMaxHit();
+            int randomPlay = (int) (Math.random() * playerMax + 1);
+            //System.out.println(randomPlay);
+            clearRow(0);
+            rewriteInfo(randomMon, randomPlay, player);
+
             return true;
             
             
         }
         return false;
+    }
+
+    // rewrites the info part and the hitpoints part as well
+    private void rewriteInfo(int randomMon, int randomPlay, Player player){
+        String secBottom = "Info: Monster attacked player -" + randomMon + " and player attacked monster - " + randomPlay;
+        for(int i = 0; i < secBottom.length(); i++){
+            char write = secBottom.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+        }
+        int hp = player.getHp() - randomMon;
+        player.setHp(hp);
+        String top = "HP: " + hp + " Score: 0";
+        for(int i = 0; i < top.length(); i++){
+            char write = top.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            this.addObjectToDisplay(writing, i, 0);
+        }
+
     }
 
     //private void updateInfoSection()
