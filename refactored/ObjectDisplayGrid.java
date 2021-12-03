@@ -23,6 +23,8 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     private static int width;
     public int playerxCord;
     public int playeryCord;
+    private boolean endGame = false;
+    private boolean pressedE = false;
 
     public ObjectDisplayGrid(int _width, int _height) {
         width = _width;
@@ -75,7 +77,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         KeyEvent keypress = (KeyEvent) e;
         notifyInputObservers(keypress.getKeyChar());
         Player track = Player.buildPlayer("", 0, 0);
-        if(track.getHp() > 0){
+        if(track.getHp() > 0 && endGame == false){
             int origX = track.getX();
             int origY = track.getY();
             if (keypress.getKeyChar() == 'h'){
@@ -99,9 +101,53 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
             else if(keypress.getKeyChar() == 'p'){
                 pickUp(track.getX(), track.getY());
             }
+            else if(keypress.getKeyChar() == 'E'){
+                infoSection("Info: Press y or Y to end game");
+                pressedE = true;
+                
+            }
+            else if(pressedE && (keypress.getKeyChar() == 'Y' || keypress.getKeyChar() == 'y' )){
+                infoSection("Info: Game quit by user");
+                endGame = true;
+            }
+            else if(keypress.getKeyChar() == '?'){
+                infoSection("Info: h: left, j: down, k: up, l: right, p: pickup item, d: drop item");
+            }
+            else if(keypress.getKeyChar() == 'c'){
+                removeArmor(track);
+            }
+            else if(keypress.getKeyChar() == 'w'){
+                addArmor(track);
+            }
+            else if(Character.isDigit(keypress.getKeyChar())){
+                infoSection("Info: digit pressed");
+            }
+    }  
     }
-        
-        
+
+
+    private void addArmor(Player track){
+
+    }
+    private void removeArmor(Player track){
+        if(track.isWearing() == false){
+            infoSection("Info: No armor being worn");
+        }
+        else{
+            track.addPlayerItem(track.getArmor());
+            track.setWearing(null);
+        }
+
+    }
+
+    private void infoSection(String str){
+        for(int i = 0; i < str.length(); i++){
+            char write = str.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+        }
+
     }
 
     private void clearRow(int y){

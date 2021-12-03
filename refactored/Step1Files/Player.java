@@ -6,6 +6,7 @@ public class Player extends Creature {
     private int serial;
     static Player player;
     private ArrayList<Item> playerItems = new ArrayList<>();
+    private Item isWearing = null;
     public static Player buildPlayer(String _name, int _room, int _serial){
         if(player ==  null){
            player = new Player(_name,  _room, _serial);
@@ -31,6 +32,22 @@ public class Player extends Creature {
 
     public ArrayList<Item> getPlayerItems(){
         return playerItems;
+    }
+
+    public boolean isWearing(){
+        if(isWearing != null){
+            return true;
+        }
+        
+        return false;
+    }
+
+    public Item getArmor(){
+        return isWearing;
+    }
+
+    public void setWearing(Item item){
+        isWearing = item;
     }
     
 }
