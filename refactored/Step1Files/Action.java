@@ -21,4 +21,16 @@ public class Action {
         charVal = c;
         System.out.println("Char value is " + charVal);
     }
+
+    public String getMessage(){
+        return msg;
+    }
+
+    public String getCharValue(){
+        return charVal;
+    }
+
+    public int getIntValue(){
+        return intVal;
+    }
 }

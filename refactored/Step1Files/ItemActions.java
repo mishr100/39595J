@@ -12,4 +12,19 @@ public class ItemActions extends Action {
         System.out.println("Item action type is " + type);
 
     }
+    public String getMessage(){
+        return msg;
+    }
+
+    public String getCharValue(){
+        return charVal;
+    }
+
+    public int getIntValue(){
+        return intVal;
+    }
+
+    public String getName(){
+        return name;
+    }
 }

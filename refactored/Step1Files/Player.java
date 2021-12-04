@@ -6,7 +6,8 @@ public class Player extends Creature {
     private int serial;
     static Player player;
     private ArrayList<Item> playerItems = new ArrayList<>();
-    private Item isWearing = null;
+    private Armor isWearing = null;
+    private Sword wielding = null;
     public static Player buildPlayer(String _name, int _room, int _serial){
         if(player ==  null){
            player = new Player(_name,  _room, _serial);
@@ -47,7 +48,23 @@ public class Player extends Creature {
     }
 
     public void setWearing(Item item){
-        isWearing = item;
+        isWearing = (Armor) item;
     }
+    public boolean isWielding(){
+        if(wielding != null){
+            return true;
+        }
+        
+        return false;
+    }
+
+    public Item getSword(){
+        return wielding;
+    }
+
+    public void setWielding(Sword sword){
+        wielding = sword;
+    }
+    
     
 }

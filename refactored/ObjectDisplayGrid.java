@@ -13,6 +13,8 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
 
     private static final int DEBUG = 0;
     private static final String CLASSID = ".ObjectDisplayGrid";
+    private static final int infoRow = 1;
+    private static final int packRow = 3;
 
     private static AsciiPanel terminal;
      public Stack<Displayable> [][] objectGrid = null;
@@ -25,6 +27,36 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     public int playeryCord;
     private boolean endGame = false;
     private boolean pressedE = false;
+    private Integer index = null;
+    private char letterPressed = 'z'; // for letters w,t,r, and d
+    private int hallucinationLeft = 0; // number of moves player has left under hallucination 
+    private Scroll hallucinateScroll = null;
+    private static final ArrayList<Character> allCommands= new ArrayList<Character>() {{
+        add('h');
+        add('j');
+        add('k');
+        add('l');
+        add('i');
+        add('p');
+        add('d');
+        add('E');
+        add('r');
+        add('T');
+        add('c');
+        add('w');
+        add('?');
+    }};
+    private static final ArrayList<Displayable> allCharacters = new ArrayList<Displayable>() {{
+        add(new Displayable('.'));
+        add(new Displayable('#'));
+        add(new Displayable(']'));
+        add(new Displayable(')'));
+        add(new Displayable('?'));
+        add(new Displayable('H'));
+        add(new Displayable('S'));
+        add(new Displayable('T'));
+        add(new Displayable('X'));
+    }};
 
     public ObjectDisplayGrid(int _width, int _height) {
         width = _width;
@@ -44,7 +76,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         initializeDisplay(); // create initial display 
 
         super.add(terminal);
-        super.setSize(width * 9, height * 16);
+        super.setSize(width * 9, height * 17);
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // super.repaint();
         // terminal.repaint( );
@@ -80,7 +112,51 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         if(track.getHp() > 0 && endGame == false){
             int origX = track.getX();
             int origY = track.getY();
-            if (keypress.getKeyChar() == 'h'){
+            if(letterPressed == 'H' && allCommands.contains(keypress.getKeyChar())){
+                char letter = keypress.getKeyChar();
+                if(letter == 'h'){
+                    infoSection("Info: press h to move left");
+                }
+                else if(letter == 'j'){
+                    infoSection("Info: press j to move down");
+                }
+                else if(letter == 'k'){
+                    infoSection("Info: press k to move up");
+                }
+                else if(letter == 'l'){
+                    infoSection("Info: press l to move right");
+                }
+                else if(letter == 'T'){
+                    infoSection("Info: press T and a number to wield sword from particular pack position");
+                }
+                else if(letter == 'w'){
+                    infoSection("Info: press w and a number to wear armor from particular pack position");
+                }
+                else if(letter == 'c'){
+                    infoSection("Info: press c to stop wearing armor");
+                }
+                else if(letter == 'i'){
+                    infoSection("Info: press i to see contents of the player's pack");
+                }
+                else if(letter == 'p'){
+                    infoSection("Info: press p to pick up an item player is standing on");
+                }
+                else if(letter == 'd'){
+                    infoSection("Info: press d and a number to drop item from particular pack position");
+                }
+                else if(letter == 'E'){
+                    infoSection("Info: press E and y or Y to end the game");
+                }
+                else if(letter == 'r'){
+                    infoSection("Info: press r and a number to read a scroll from particular pack position");
+                }
+                else if(letter == '?'){
+                    infoSection("Info: press ? to see list of letters representing commands");
+                }
+
+                letterPressed = 'z';
+            }
+            else if (keypress.getKeyChar() == 'h'){
                 moveLeft(track);
             }
             else if(keypress.getKeyChar() == 'l'){
@@ -93,7 +169,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
                 moveUp(track);
             }
             else if(keypress.getKeyChar() == 'd'){
-                dropItem(track);
+                letterPressed = 'd';
             }
             else if(keypress.getKeyChar() == 'i'){
                 showPack(track);
@@ -106,84 +182,257 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
                 pressedE = true;
                 
             }
+            else if(keypress.getKeyChar() == 'H'){
+                letterPressed = 'H';
+            }
             else if(pressedE && (keypress.getKeyChar() == 'Y' || keypress.getKeyChar() == 'y' )){
                 infoSection("Info: Game quit by user");
                 endGame = true;
             }
             else if(keypress.getKeyChar() == '?'){
-                infoSection("Info: h: left, j: down, k: up, l: right, p: pickup item, d: drop item");
+                infoSection("Info: Possible commands: h,j,k,l,c,w,d,E,H,i,r,T,?");
             }
             else if(keypress.getKeyChar() == 'c'){
                 removeArmor(track);
             }
             else if(keypress.getKeyChar() == 'w'){
-                addArmor(track);
+                //addArmor(track);
+                letterPressed = 'w';
+
+            }
+            else if(keypress.getKeyChar() == 'T'){
+                letterPressed = 'T';
+            }
+            else if(keypress.getKeyChar() == 'r'){
+                letterPressed = 'r';
             }
             else if(Character.isDigit(keypress.getKeyChar())){
-                infoSection("Info: digit pressed");
+                if(letterPressed == 'w'){
+                    addArmor(track, keypress.getKeyChar());
+                    letterPressed = 'z'; // sort of the reset 
+                }
+                else if(letterPressed == 'd'){
+                    dropItem(track, keypress.getKeyChar());
+                }
+                else if(letterPressed == 'T'){
+                    wieldSword(track, keypress.getKeyChar());
+                }
+                else if(letterPressed == 'r'){
+                    readScroll(track,keypress.getKeyChar());
+                }
             }
     }  
     }
 
+    private void readScroll(Player track, char num){
+        ArrayList<Item> playerItems = track.getPlayerItems();
+        int numb = num - '0';
+        numb = numb - 1;
+        if(numb >= playerItems.size()){
+            infoSection("Info: No such item exists");
+            return;
+        }
+        Item toRead = playerItems.get(numb);
+        if(toRead instanceof Scroll){
+            Scroll reading = (Scroll) toRead;
+            infoSection("Info: New scroll being read: " + toRead.getName());
+            ItemActions stored = reading.getScrollAction();
+            infoSection(stored.getName());
+            if(stored.getCharValue() != null && stored.getCharValue().equals("a") && track.isWearing()){
+                infoSection("Info: " + stored.getMessage() + " " + stored.getIntValue() + " to " +   "" + track.getArmor().getName());
+                Armor armor = (Armor) track.getArmor();
+                armor.setArmorVal(stored.getIntValue());
+            }
+            else if(stored.getCharValue() != null && stored.getCharValue().equals("a") && !track.isWearing()){
+                infoSection("Info: " + reading.getName() + " of cursing/blessing does nothing because no armor is being worn");
 
-    private void addArmor(Player track){
-
+            }
+            else if(stored.getCharValue() != null  && stored.getCharValue().equals("w") && track.isWielding()){
+                infoSection("Info: " + stored.getMessage() + " " + stored.getIntValue() + " to " + "" + track.getSword().getName());
+                //playerItems.remove(numb);
+                Sword sword = (Sword) track.getSword();
+                sword.setSwordVal(stored.getIntValue());
+            }
+            else if(stored.getCharValue() != null  && stored.getCharValue().equals("w") && !track.isWielding()){
+                infoSection("Info: " + reading.getName() + " of cursing/blessing does nothing because no sword is being used");
+            }
+            else if(stored.getName().equals("Hallucinate")){
+                hallucinationLeft = stored.getIntValue() + 1;
+                infoSection(stored.getMessage());
+                hallucinateScroll = reading;
+                hallucinate(reading);
+            }
+            playerItems.remove(numb);
+        }
+        else{
+            infoSection("Info: Identified Item isn't a scroll.");
+        }
     }
+
+    // should also use the hallucination left variable 
+    private void hallucinate(Scroll reading){
+        infoSection("Info: Hallucination left for " + hallucinationLeft + " moves");
+        if (hallucinationLeft > 0){
+            for(int i = 0; i < objectGrid.length; i++){
+                for(int j = 0; j < objectGrid[0].length; j++){
+                    if(objectGrid[i][j].peek().getType() != ' ' && objectGrid[i][j].peek().getType() != '@' ){
+                        Random r= new Random();        
+      	                int randomNumber=r.nextInt(allCharacters.size());
+      	                terminal.write(allCharacters.get(randomNumber).getType(),i, j );
+                    }
+                }
+            }
+        }
+        else {
+            for(int i = 0; i < objectGrid.length; i++){
+                for(int j = 0; j < objectGrid[0].length; j++){
+                    if(getObjectOnDisplay(i,j).getType() != ' '){
+                        terminal.write(objectGrid[i][j].peek().getType(), i, j);
+                    }
+                }
+            }
+        }
+        terminal.repaint();
+    }
+
+    private void wieldSword(Player track, char num){
+        ArrayList<Item> playerItems = track.getPlayerItems();
+        int numb = num - '0';
+        numb = numb - 1;
+        if(numb >= playerItems.size()){
+            infoSection("Info: No such item exists");
+            return;
+        }
+        Item toWield = playerItems.get(numb);
+        if(track.isWielding()){
+            Sword wielding = (Sword) track.getSword();
+            infoSection("Info: Sword already being wielded: " + wielding.getName());
+        }
+        else if(toWield instanceof Sword){
+            Sword wielding = (Sword) toWield;
+            track.setWielding(wielding);
+            infoSection("Info: New sword being wielded: " + wielding.getName());
+        }
+        else{
+            infoSection("Info: Identified Item isn't sword.");
+        }
+    }
+    private int getInfoRow(){
+        return this.objectGrid[0].length - 1;
+    }
+
+    private int getPackRow(){
+        return this.objectGrid[0].length - 3;
+    }
+    private void addArmor(Player track, char number){
+        ArrayList<Item> playerItems = track.getPlayerItems();
+        int num = number - '0';
+        num = num - 1;
+        if(num >= playerItems.size()){
+            infoSection("Info: No such item exists");
+            return;
+        }
+        Item toWear = playerItems.get(num);
+        if(track.isWearing()){
+            Armor wearing = (Armor) track.getArmor();
+            infoSection("Info: Armor already being worn: " + wearing.getName());
+        }
+        else if(toWear instanceof Armor){
+            Armor wearing = (Armor) toWear;
+            track.setWearing(toWear);
+            infoSection("Info: New item being worn: " + wearing.getName());
+        }
+        else{
+            infoSection("Info: Identified Item isn't armor.");
+        }
+    }
+    
     private void removeArmor(Player track){
         if(track.isWearing() == false){
             infoSection("Info: No armor being worn");
         }
         else{
-            track.addPlayerItem(track.getArmor());
             track.setWearing(null);
+            infoSection("Info: Armor removed");
         }
 
     }
 
     private void infoSection(String str){
-        for(int i = 0; i < str.length(); i++){
+        int i = 0;
+        for(i = 0; i < str.length(); i++){
             char write = str.charAt(i);
             Displayable writing = new Displayable();
             writing.setType(write);
-            this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+            //this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+            terminal.write(str.charAt(i), i, getInfoRow());
         }
-
-    }
-
-    private void clearRow(int y){
-        for(int i = 0; i < this.objectGrid.length; i++){
-            Displayable clear = new Displayable();
-            clear.setType(' ');
-            addObjectToDisplay(clear, i, y);
+        for(;i<objectGrid.length; i++){
+            terminal.write(' ', i, getInfoRow());
         }
+        terminal.repaint();
+
     }
 
     private void showPack(Player track){
         String firstBottom = "Pack: ";
-        clearRow(this.objectGrid[0].length - 3);
+        String itemName = "";
+        //clearRow(this.objectGrid[0].length - 3);
         ArrayList<Item> pack = track.getPlayerItems();
         for(int j = 0; j < pack.size(); j++){
-            firstBottom += Integer.toString(j) + ": " + pack.get(j).getType() + " ";
+            if(pack.get(j) == track.getArmor()){
+                itemName = track.getArmor().getName();
+                itemName += " (a)";
+            }
+            else if(pack.get(j) == track.getSword()){
+                itemName = track.getSword().getName() + " (w)";
+            }
+            else{
+                System.out.println("Item name is " + pack.get(j).getName());
+                itemName = pack.get(j).getName();
+            }
+            firstBottom += Integer.toString(j+1) + ": " + itemName + " ";
         }
         if(pack.size() == 0){
             firstBottom = "Pack: ";
         }
-        for(int i = 0; i < firstBottom.length(); i++){
+        int i = 0;
+        for(i = 0; i < firstBottom.length(); i++){
+            /*
             char write = firstBottom.charAt(i);
             Displayable writing = new Displayable();
             writing.setType(write);
             this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 3);
+            */
+            terminal.write(firstBottom.charAt(i), i, getPackRow());
         }
+        for(;i<objectGrid.length; i++){
+            terminal.write(' ', i, getPackRow());
+        }
+
+        terminal.repaint();
     }
 
-    private void dropItem(Player track){
+    private void dropItem(Player track, char num){
         ArrayList<Item> playerItems = track.getPlayerItems();
-        //objectGrid[track.getX()][track.getY()].add(objectGrid[track.getX()][track.getY()].size() - 1,playerItems.get(playerItems.size() - 1));
+        int numb = num - '0';
+        System.out.println("Number of items in pack " + numb);
+        if(numb >= playerItems.size()){
+            infoSection("Info: No such item exists");
+            return;
+        }
         Displayable player = removeObjectFromDisplay(track.getX(), track.getY());
-        //Displayable object = removeObjectFromDisplay(track.getX(), track.getY());
-        addObjectToDisplay(playerItems.get(playerItems.size() - 1), track.getX(), track.getY());
+        addObjectToDisplay(playerItems.get(numb), track.getX(), track.getY());
         addObjectToDisplay(player, track.getX(), track.getY());
-        playerItems.remove(playerItems.size() - 1);
+        if(playerItems.get(numb) == track.getArmor()){
+            track.setWearing(null);
+            infoSection("Info: Armor dropped, no longer being worn");
+        }
+        if(playerItems.get(numb) == track.getSword()){
+            track.setWielding(null);
+            infoSection("Info: Sword dropped, no longer being wielded");
+        }
+        playerItems.remove(numb);
         System.out.println(playerItems);
     }
 
@@ -201,6 +450,9 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         Player hold = (Player) removeObjectFromDisplay(x,y);
         System.out.println("Stack before pickup: " + objectGrid[x][y]);
         Displayable atPoint = getObjectOnDisplay(x,y);
+        if(atPoint instanceof RoomFloor){
+            return false;
+        }
         if(atPoint instanceof Item){
             Item item = (Item) atPoint;
             player.addPlayerItem(item);
@@ -229,7 +481,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
             int playerMax = player.getMaxHit();
             int randomPlay = (int) (Math.random() * playerMax + 1);
             //System.out.println(randomPlay);
-            clearRow(0);
+            //clearRow(0);
             rewriteInfo(randomMon, randomPlay, player);
 
             return true;
@@ -244,19 +496,22 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         String secBottom = "Info: Monster attacked player -" + randomMon + " and player attacked monster - " + randomPlay;
         for(int i = 0; i < secBottom.length(); i++){
             char write = secBottom.charAt(i);
-            Displayable writing = new Displayable();
-            writing.setType(write);
-            this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+            //Displayable writing = new Displayable();
+            //writing.setType(write);
+            //this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+            terminal.write(write, i, this.objectGrid[0].length - 1);
         }
         int hp = player.getHp() - randomMon;
         player.setHp(hp);
         String top = "HP: " + hp + " Score: 0";
         for(int i = 0; i < top.length(); i++){
             char write = top.charAt(i);
-            Displayable writing = new Displayable();
-            writing.setType(write);
-            this.addObjectToDisplay(writing, i, 0);
+            //Displayable writing = new Displayable();
+            //writing.setType(write);
+            //this.addObjectToDisplay(writing, i, 0);
+            terminal.write(write, i, 0);
         }
+        terminal.repaint();
 
     }
 
@@ -266,10 +521,21 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         if(movementPossible(track.getX() - 1, track.getY())){
             addObjectToDisplay(track, track.getX() - 1, track.getY());
             objectGrid[track.getX()][track.getY()].pop();
-            System.out.println(objectGrid[track.getX()][track.getY()].peek().getType());
+            //System.out.println(objectGrid[track.getX()][track.getY()].peek().getType());
             //addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY());
+            char ch = getObjectOnDisplay(track.getX(), track.getY()).getType();
+            if(ch == ' '){
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor,track.getX(), track.getY());
+                return;
+            }
             writeToTerminal(track.getX(), track.getY());
             track.setX(track.getX() - 1);
+            if(hallucinationLeft > 0){
+                hallucinationLeft -= 1;
+                hallucinate(hallucinateScroll);
+            }
+            
         }
         else{
             combat(track.getX() - 1, track.getY());
@@ -282,8 +548,18 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
             objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
             //System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
             //addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+            char ch = getObjectOnDisplay(track.getX(), track.getY()).getType();
+            if(ch == ' '){
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor,track.getX(), track.getY());
+                return;
+            }
             writeToTerminal(track.getX(), track.getY());
             track.setX(track.getX() + 1);
+            if(hallucinationLeft > 0){
+                hallucinationLeft -= 1;
+                hallucinate(hallucinateScroll);
+            }
         }
         else{
             combat(track.getX() + 1, track.getY());
@@ -296,8 +572,18 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
             objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
             //System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
             //addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+            char ch = getObjectOnDisplay(track.getX(), track.getY()).getType();
+            if(ch == ' '){
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor,track.getX(), track.getY());
+                return;
+            }
             writeToTerminal(track.getX(), track.getY());
             track.setY(track.getY() + 1);
+            if(hallucinationLeft > 0){
+                hallucinationLeft -= 1;
+                hallucinate(hallucinateScroll);
+            }
         }
         else{
             combat(track.getX(), track.getY() + 1);
@@ -311,8 +597,18 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
             objectGrid[track.getX()][track.getY()].pop(); // remove player from old location
             //System.out.println(objectGrid[track.getX()][track.getY()].peek().getType()); // debugging
             //addObjectToDisplay(objectGrid[track.getX()][track.getY()].peek(), track.getX(), track.getY()); // rewrite old location
+            char ch = getObjectOnDisplay(track.getX(), track.getY()).getType();
+            if(ch == ' '){
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor,track.getX(), track.getY());
+                return;
+            }
             writeToTerminal(track.getX(), track.getY());
             track.setY(track.getY() - 1);
+            if(hallucinationLeft > 0){
+                hallucinationLeft -= 1;
+                hallucinate(hallucinateScroll);
+            }
             
         }
         else{
@@ -379,6 +675,13 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
 
     // add pop(x, y)
 
+    public void terminalWrite(char ch, int x, int y){
+        terminal.write(ch,x,y);
+    }
+
+    public void repainter(){
+        terminal.repaint();
+    }
     private void writeToTerminal(int x, int y) {
         char ch = objectGrid[x][y].peek().getType();//.getChar(); //peek
         terminal.write(ch, x, y); // staging a change for 

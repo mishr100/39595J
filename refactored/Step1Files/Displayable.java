@@ -16,6 +16,10 @@ public class Displayable{
         //System.out.println("New displayable object created");
     }
 
+    public Displayable(char ch){
+        this.setType(ch);
+    }
+
     public void setInvisible(){
         visible = false;
     }

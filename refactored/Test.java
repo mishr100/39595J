@@ -66,15 +66,18 @@ public class Test implements Runnable {
     }
 
     private void writeInitialTop(ObjectDisplayGrid displayGrid){
+        
         Player player = Player.buildPlayer("", 0, 0);
         String hp = Integer.toString(player.getHp());
         String top = "HP: " + hp + " Score:  0";
         for(int i = 0; i < top.length(); i++){
             char write = top.charAt(i);
-            Displayable writing = new Displayable();
-            writing.setType(write);
-            displayGrid.addObjectToDisplay(writing, i, 0);
+            //Displayable writing = new Displayable();
+            //writing.setType(write);
+            //displayGrid.addObjectToDisplay(writing, i, 0);
+            displayGrid.terminalWrite(write,i,0);
         }
+        displayGrid.repainter();
     }
 
     private void writeInitialBottom(ObjectDisplayGrid displayGrid){
@@ -82,15 +85,17 @@ public class Test implements Runnable {
         String secBottom = "Info: ";
         for(int i = 0; i < firstBottom.length(); i++){
             char write = firstBottom.charAt(i);
-            Displayable writing = new Displayable();
-            writing.setType(write);
-            displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 3);
+            //Displayable writing = new Displayable();
+            //writing.setType(write);
+            //displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 3);
+            displayGrid.terminalWrite(write,i,displayGrid.objectGrid[0].length - 3);
         }
         for(int i = 0; i < secBottom.length(); i++){
             char write = secBottom.charAt(i);
-            Displayable writing = new Displayable();
-            writing.setType(write);
-            displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 1);
+            //Displayable writing = new Displayable();
+            //writing.setType(write);
+            //displayGrid.addObjectToDisplay(writing, i, displayGrid.objectGrid[0].length - 1);
+            displayGrid.terminalWrite(write,i,displayGrid.objectGrid[0].length - 1);
         }
     }
 

@@ -127,6 +127,11 @@ public class DungeonXMLHandler extends DefaultHandler {
             String type = attributes.getValue("type");
             action = new ItemActions(name, type);
             anItem.addItem(action);
+            if(anItem instanceof Scroll){
+                Scroll forItemAction = (Scroll) anItem;
+                forItemAction.setScrollAction((ItemActions) action);
+            }
+
         }
         data = new StringBuilder();
     } 

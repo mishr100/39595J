@@ -15,5 +15,8 @@ public class Item extends Displayable {
         itemVal = _itemVal;
         System.out.println("Item value is " + itemVal);
     }
+    public String getName(){
+        return ""; // solely here for overriding 
+    }
     
 }
