@@ -31,6 +31,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     private char letterPressed = 'z'; // for letters w,t,r, and d
     private int hallucinationLeft = 0; // number of moves player has left under hallucination 
     private Scroll hallucinateScroll = null;
+    private int score = 0;
     private static final ArrayList<Character> allCommands= new ArrayList<Character>() {{
         add('h');
         add('j');
@@ -221,6 +222,9 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
                     readScroll(track,keypress.getKeyChar());
                 }
             }
+    }
+    else if(track.getHp() <= 0){
+        infoSection("Info: Player is dead. Game over!");
     }  
     }
 
@@ -416,6 +420,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     private void dropItem(Player track, char num){
         ArrayList<Item> playerItems = track.getPlayerItems();
         int numb = num - '0';
+        numb = numb - 1;
         System.out.println("Number of items in pack " + numb);
         if(numb >= playerItems.size()){
             infoSection("Info: No such item exists");
@@ -476,21 +481,188 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
             // perform combat options
             int monsterMax = atPoint.getMaxHit();
             int randomMon = (int) (Math.random() * monsterMax + 1);
-            //System.out.println(randomMon);
             Player player = Player.buildPlayer("", 0, 0);
             int playerMax = player.getMaxHit();
             int randomPlay = (int) (Math.random() * playerMax + 1);
-            //System.out.println(randomPlay);
-            //clearRow(0);
-            rewriteInfo(randomMon, randomPlay, player);
-
-            return true;
-            
-            
+            rewriteInfo(randomMon, randomPlay, player, (Monster) atPoint);
+            inflictDeath(player, (Monster) atPoint, x, y); // checks the death related actions first
+            getDeath(player, (Monster) atPoint, x, y);
+            hitActions(player, (Monster) atPoint, x, y);
+            return true;   
         }
         return false;
     }
 
+    private void hitActions(Player player, Monster monster, int x, int y){
+        int action = checkParticularAction(player, "DropPack");
+        ArrayList<Step1Files.Action> playerActions = player.getActionList();
+        ArrayList<Item> playerItems = player.getPlayerItems();
+        if(action > -1){
+            if(playerItems.size() > 0){
+                dropItem(player,'0');
+                infoSection("Info: " + playerActions.get(action).getMessage());
+            }
+        }
+        action = checkParticularAction(player, "EmptyPack");
+        if(action > -1){
+            while(playerItems.size() > 0){
+                dropItem(player, '0');
+                infoSection("Info: " + playerActions.get(action).getMessage());
+            }
+        }
+
+        //implementing Teleport action 
+        action = checkParticularAction(monster, "Teleport");
+        if(action > -1){
+            teleport(monster, x, y);
+        }
+        action = checkParticularAction(player, "Teleport");
+        if(action > -1){
+            teleport(monster, x, y);
+        }
+    }
+
+    private void teleport(Monster monster, int x, int y){
+        boolean transported = false;
+        while(transported == false){
+            int randx = (int) (Math.random() * objectGrid.length);
+            int randy = (int) (Math.random() * objectGrid[0].length);
+            System.out.println("x and y" + randx + " and " + randy);
+            Displayable el = getObjectOnDisplay(randx, randy);
+            System.out.println("displayable character is " + el.getType());
+            if(el.getType() != ' ' && el.getType() != 'X' && !(el instanceof Creature)){
+                infoSection("Entered");
+                Displayable moving = removeObjectFromDisplay(x,y);
+                terminalWrite(moving.getType(), x, y);
+                addObjectToDisplay(moving, x, y);
+                transported = true;
+            }
+        }
+    }
+
+    private void getDeath(Player player, Monster monster, int x, int y ){
+        System.out.println("player hp is " + player.getHp());
+        ArrayList<Step1Files.Action> allActions = player.getActionList();
+         if(player.getHp() <= 0){
+            int action = checkParticularAction(player, "Remove");
+            if(action > -1){
+                removeObjectFromDisplay(x,y);
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor,x,y);
+            }
+            else{
+                char ch = getObjectOnDisplay(x, y).getType();
+                removeObjectFromDisplay(x,y);
+                RoomFloor deadMonster = new RoomFloor(ch);
+                addObjectToDisplay(deadMonster, x, y);
+            }
+            action = checkParticularAction(player, "YouWin");
+            if(action > -1){
+                infoSection("Info: " + allActions.get(action).getMessage());
+                rewriteScore(allActions.get(action).getIntValue());
+            }
+            action = checkParticularAction(player, "ChangeDisplayedType");
+            if(action > - 1){
+                CreatureAction implement = (CreatureAction) allActions.get(action);
+                player.setType(implement.getCharValue().charAt(0)); // change displayed type
+                addObjectToDisplay(player, player.getX(), player.getY()); // update display
+            }
+            action = checkParticularAction(player, "EndGame");
+            if(action > -1){
+                CreatureAction implement = (CreatureAction) allActions.get(action);
+                infoSection("Info: " + implement.getMessage());
+            }
+        }
+    }
+
+    // x and y refer to the monster's location 
+    private void inflictDeath(Player player, Monster monster, int x , int y){
+        // taking care of the remove action 
+        ArrayList<Step1Files.Action> allActions = monster.getActionList();
+        if(monster.getHp() <= 0){
+            int action = checkParticularAction(monster, "Remove");
+            if(action > -1){
+                removeObjectFromDisplay(x,y);
+                RoomFloor floor = new RoomFloor('.');
+                addObjectToDisplay(floor,x,y);
+            }
+            else{
+                char ch = getObjectOnDisplay(x, y).getType();
+                removeObjectFromDisplay(x,y);
+                RoomFloor deadMonster = new RoomFloor(ch);
+                addObjectToDisplay(deadMonster, x, y);
+            }
+            action = checkParticularAction(monster, "YouWin");
+            if(action > -1){
+                infoSection("Info: " + allActions.get(action).getMessage());
+                rewriteScore(allActions.get(action).getIntValue());
+
+            }
+            action = checkParticularAction(monster, "ChangeDisplayedType");
+            if(action > - 1){
+                CreatureAction implement = (CreatureAction) allActions.get(action); 
+                monster.setType(implement.getCharValue().charAt(0)); // ChangeDisplayedType
+                addObjectToDisplay(monster, x, y); // update display
+            }
+        }
+    }
+    
+    private int checkParticularAction(Creature creature, String actionType){
+        ArrayList<Step1Files.Action> allActions = creature.getActionList();
+        System.out.println("size of this list is " + allActions.size());
+        for(int i = 0; i < creature.getActionList().size(); i++){
+            System.out.println("name is " + allActions.get(i).getName());
+            CreatureAction action = (CreatureAction) allActions.get(i);
+            System.out.println("CreatureAction updated " + action.getName());
+            if(action.getName().equals(actionType)){
+                return i;
+            }
+        }
+        return -1;
+
+    }
+
+    private void rewriteScore(int val){
+        Player player = Player.buildPlayer("", 0, 0);
+        score += val;
+        String str = "HP: " + player.getHp() + " Score: " + score;
+        int i = 0;
+        for(i = 0; i < str.length(); i++){
+            char write = str.charAt(i);
+            //Displayable writing = new Displayable();
+            //writing.setType(write);
+            //this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+            terminal.write(str.charAt(i), i, 0);
+        }
+        for(;i<objectGrid.length; i++){
+            terminal.write(' ', i, 0);
+        }
+        terminal.repaint();
+
+    }
+    private void rewriteInfo(int randomMon, int randomPlay, Player player, Monster monster){
+        int i = 0;
+        int hp = player.getHp() - randomMon;
+        player.setHp(hp);
+        int monsthp = monster.getHp() - randomPlay;
+        monster.setHp(monsthp);
+        String info = "Info: Attack! New monster Hp " + monsthp + " and new player Hp " + hp;
+        infoSection(info);
+        String str = "HP: " + hp + " Score: 0";
+        for(i = 0; i < str.length(); i++){
+            char write = str.charAt(i);
+            Displayable writing = new Displayable();
+            writing.setType(write);
+            //this.addObjectToDisplay(writing, i, this.objectGrid[0].length - 1);
+            terminal.write(str.charAt(i), i, 0);
+        }
+        for(;i<objectGrid.length; i++){
+            terminal.write(' ', i, 0);
+        }
+        terminal.repaint();
+    }
+
+    /*
     // rewrites the info part and the hitpoints part as well
     private void rewriteInfo(int randomMon, int randomPlay, Player player){
         String secBottom = "Info: Monster attacked player -" + randomMon + " and player attacked monster - " + randomPlay;
@@ -514,6 +686,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         terminal.repaint();
 
     }
+    */
 
     //private void updateInfoSection()
 

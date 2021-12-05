@@ -50,5 +50,9 @@ public class Creature extends Displayable {
         return null;
     }
 
+    public ArrayList<Action> getActionList(){
+        return allActions;
+    }
+
 
 }

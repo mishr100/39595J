@@ -75,6 +75,7 @@ public class DungeonXMLHandler extends DefaultHandler {
             String type = attributes.getValue("type");
             action = new CreatureAction(name, type);
             toAdd.addAction(action);
+            System.out.println(toAdd.getActionList().get(toAdd.getActionList().size() - 1).getName());
 
         }
         else if(qName.equalsIgnoreCase("Scroll")){

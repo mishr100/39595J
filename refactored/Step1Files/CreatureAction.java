@@ -11,4 +11,8 @@ public class CreatureAction extends Action{
         System.out.println("Creature action type is " + type);
 
     }
+
+    public String getName(){
+        return name;
+    }
 }

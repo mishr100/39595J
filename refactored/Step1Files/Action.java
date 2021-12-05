@@ -33,4 +33,8 @@ public class Action {
     public int getIntValue(){
         return intVal;
     }
+
+    public String getName(){
+        return "";
+    }
 }
