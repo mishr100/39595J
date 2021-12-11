@@ -250,7 +250,9 @@ public class Test implements Runnable {
         DungeonXMLHandler handler = new DungeonXMLHandler();
         saxParser.parse(new File(fileName), handler);
     } catch (ParserConfigurationException | SAXException | IOException e) {
-        e.printStackTrace(System.out);
+        System.out.println(e.getMessage());
+        //e.printStackTrace(System.out);
+        return;
     }
 
     Dungeon playingSpace = Dungeon.buildDungeon(null, 0, 0, 0, 0);

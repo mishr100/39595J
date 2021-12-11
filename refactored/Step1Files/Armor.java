@@ -31,6 +31,18 @@ public class Armor extends Item{
         return name;
     }
 
+    public void setName(){
+        if(effectiveness > 0){
+            name = "+" + effectiveness + " Armor";
+        }
+        else if(effectiveness < 0){
+            name = "-" + effectiveness + " Armor";
+        }
+        else{
+            name = effectiveness + " Armor";
+        }
+    }
+
     public void setArmorVal(int alter){
         effectiveness += alter;
     }

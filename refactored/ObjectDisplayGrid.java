@@ -32,6 +32,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
     private int hallucinationLeft = 0; // number of moves player has left under hallucination 
     private Scroll hallucinateScroll = null;
     private int score = 0;
+    private Random rand = new Random();
     private static final ArrayList<Character> allCommands= new ArrayList<Character>() {{
         add('h');
         add('j');
@@ -246,6 +247,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
                 infoSection("Info: " + stored.getMessage() + " " + stored.getIntValue() + " to " +   "" + track.getArmor().getName());
                 Armor armor = (Armor) track.getArmor();
                 armor.setArmorVal(stored.getIntValue());
+                armor.setName();
             }
             else if(stored.getCharValue() != null && stored.getCharValue().equals("a") && !track.isWearing()){
                 infoSection("Info: " + reading.getName() + " of cursing/blessing does nothing because no armor is being worn");
@@ -499,14 +501,14 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         ArrayList<Item> playerItems = player.getPlayerItems();
         if(action > -1){
             if(playerItems.size() > 0){
-                dropItem(player,'0');
+                dropItem(player,'1');
                 infoSection("Info: " + playerActions.get(action).getMessage());
             }
         }
         action = checkParticularAction(player, "EmptyPack");
         if(action > -1){
             while(playerItems.size() > 0){
-                dropItem(player, '0');
+                dropItem(player, '1');
                 infoSection("Info: " + playerActions.get(action).getMessage());
             }
         }
@@ -522,8 +524,37 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
         }
     }
 
+    // return random value in [start,end)
+    private int randRange(int start, int end) {
+        return  rand.nextInt(end - start);
+    }
+
+    private void getCandidates(ArrayList<Point> candidates){
+        for(int i = 0; i < objectGrid.length; i++){
+            for(int j = 0; j < objectGrid[0].length; j++){
+                Displayable el = getObjectOnDisplay(i,j);
+                if(el instanceof TraversableStructure){
+                    candidates.add(new Point(i,j));
+                }
+            }
+        }
+    }
+
     private void teleport(Monster monster, int x, int y){
         boolean transported = false;
+        ArrayList<Point> candidates = new ArrayList<Point>();
+        getCandidates(candidates);
+        int randNum = randRange(1, candidates.size());
+        Point toMove = candidates.get(randNum);
+        Displayable moving = removeObjectFromDisplay(x,y);
+        if(getObjectOnDisplay(x,y).getType() == ' '){
+            addObjectToDisplay(new RoomFloor('.'), x, y);
+        }
+        //terminalWrite(moving.getType(), x, y);
+        addObjectToDisplay(moving, toMove.getX(), toMove.getY());
+        writeToTerminal(x,y);
+        transported = true;
+        /*
         while(transported == false){
             int randx = (int) (Math.random() * objectGrid.length);
             int randy = (int) (Math.random() * objectGrid[0].length);
@@ -538,6 +569,7 @@ public class ObjectDisplayGrid extends JFrame implements KeyListener, InputSubje
                 transported = true;
             }
         }
+        */
     }
 
     private void getDeath(Player player, Monster monster, int x, int y ){
